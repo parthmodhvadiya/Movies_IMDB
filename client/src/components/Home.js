@@ -79,6 +79,7 @@ const Home = () => {
       });
 
       const movies = await Promise.all(moviePromises);
+      console.log(movies)
       setSearchResults(movies); // Set the search results
     } catch (error) {
       console.error('Error fetching movies by IDs:', error);

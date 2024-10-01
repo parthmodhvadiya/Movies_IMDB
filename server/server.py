@@ -37,9 +37,9 @@ def get_recommendations(prompt, num_recommendations=10):
     # return jsonify({"movie_ids": recommended_movies})
     return recommended_movies
 
-# API route to get movie recommendations based on a prompt
+# # API route to get movie recommendations based on a prompt
 @app.route('/search', methods=['POST'])
-def recommend():
+def search():
     try:
         data = request.json
         prompt = data.get('prompt')
@@ -53,28 +53,31 @@ def recommend():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
     
-# Recommandation 
-def load_movie_overviews():
-    # Load the CSV into a DataFrame
-    df = pd.read_csv('movie_overviews.csv')  # Replace with your actual CSV file path
-    # Convert DataFrame to a dictionary for easier access
-    return {str(row['movie_id']): {'title': row['title'], 'tags': row['tags']} for index, row in df.iterrows()}
+# recommend
+movies_df = pd.read_csv('../model/data/Movies.csv')  
 
-@app.route('/movie/<int:movie_id>', methods=['GET'])
-def get_recommendations(movie_id):
-    # Get the overview of the requested movie
-    movie_data = all_movie_overviews.get(str(movie_id))
-     
-    if not movie_data:
-        return jsonify({'error': 'Movie not found'}), 404
+@app.route('/recommend', methods=['POST'])
+def recommend():
+    try:
+        data = request.get_json()
+        movie_id = data.get('movie_id')
     
-    overview = movie_data['overview']
+        if not movie_id:
+            return jsonify({'error': 'No movie_id provided'}), 400
     
-    # Get recommended movie IDs based on the overview
-    recommended_movie_ids = get_recommendations(overview, all_movie_overviews)
+    # Get the movie details based on the movie_id
+        movie = movies_df[movies_df['movie_id'] == int(movie_id)]
     
-    return jsonify({'recommended_movie_ids': recommended_movie_ids})
-
-
+        if movie.empty:
+            return jsonify({'error': 'Movie not found'}), 404
+    
+        overview = movie.iloc[0]['tags']
+    
+    # Get recommendations based on the overview
+        recommendations = get_recommendations(overview)
+        return jsonify({'movie_ids': recommendations.tolist()})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    
 if __name__ == '__main__':
     app.run(debug=True)
