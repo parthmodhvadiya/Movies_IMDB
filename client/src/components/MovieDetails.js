@@ -14,6 +14,7 @@ const MovieDetails = () => {
     const fetchMovieDetails = async () => {
       try {
         const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=116368c33740a991902b1f15a377032e`);
+        console.log(response.data)
         setMovie(response.data);
       } catch (error) {
         console.error('Error fetching movie details:', error);
@@ -81,9 +82,13 @@ const MovieDetails = () => {
           <SliderComponent movies={recommendations} title="Recommended Movies" />
         )
       )} */}
-      {recommendations.length > 0 && (
+      <div className='container-fluid'>
+      { loadingRecommendations ? (
+        <div>Loading recommendations...</div>
+      ) : recommendations.length > 0 && (
         <SliderComponent movies={recommendations} title="Search Results" />
       )}
+      </div>
     </div>
   );
 };
